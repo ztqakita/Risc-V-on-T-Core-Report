@@ -86,6 +86,43 @@
 	\subsection{}
 	\section{实践篇}
 	
+	\begin{figure}[H]
+		\centering  
+		\includegraphics[scale=0.7]{2-1.png}   
+		\caption{DHCP Request包字节形式}
+	\end{figure}
+
+	\begin{enumerate}
+		\item 
+	\end{enumerate}
+
+	\begin{itemize}
+		\item 
+	\end{itemize}
+
+	\begin{lstlisting}[language={C++}]
+	class Pokemon : public QObject  	//代码
+	\end{lstlisting}
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{lll}
+			\hline
+			字段 & 值 & 含义 \\ \hline
+			包头长度 & 45 & 数据分组首部长度20字节 \\ \hline
+			服务类型 & 00 & 正常时延、正常吞吐量、正常可靠性 \\ \hline
+			总长度 & 003c & 数据分组长度60字节 \\ \hline
+			标识 & 5c6e & 标识为23662 \\ \hline
+			标志 & 00 & MF=0：此片为最后一片，DF=0：允许分片 \\ \hline
+			片偏移 & 00 & 偏移量=0 \\ \hline
+			TTL & 40 & 每跳生存周期为64 \\ \hline
+			协议 & 01 & 来自ICMP协议 \\ \hline
+			头部校验和 & 0000 & IP头部检验和为0000 \\ \hline
+			源地址 & c0a86386 & 源地址为192.168.99.134 \\ \hline
+			目的地址 & 72ff28a6 & 目的地址为114.255.40.166 \\ \hline
+		\end{tabular}
+	\end{table}
+	
 	\section{结果展示}
 	
 	\section{未来展望}
