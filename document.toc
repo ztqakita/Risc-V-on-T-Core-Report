@@ -1,4 +1,0 @@
-\contentsline {section}{\numberline {1}基础篇}{1}% 
-\contentsline {section}{\numberline {2}实践篇}{1}% 
-\contentsline {section}{\numberline {3}结果展示}{1}% 
-\contentsline {section}{\numberline {4}未来展望}{1}% 
