@@ -1,0 +1,6 @@
+# LaTeX Cache
+*.aux
+*.log
+*.toc
+*.synctex
+*.synctex.gz
