@@ -4,3 +4,6 @@
 *.toc
 *.synctex
 *.synctex.gz
+
+# MacOS Files
+*/.DS_Store
