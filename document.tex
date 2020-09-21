@@ -1,4 +1,5 @@
-\documentclass[a4paper, 11pt, oneside]{book} % A4 paper size and default 11pt font size
+% \documentclass[a4paper, 11pt, oneside]{book} % A4 paper size and default 11pt font size
+\documentclass[a4paper, 14pt, oneside]{book} % A4 paper size and default 14pt font size
 
 \newcommand*{\plogo}{\fbox{$\mathcal{PL}$}} % Generic dummy publisher logo
 
@@ -78,12 +79,98 @@
 			
 			\vspace{0.5\textheight} % Whitespace between the title block and the publisher
 			
-			{\noindent }\\[\baselineskip] % Publisher and logo
+			% {\noindent }\\[\baselineskip] % Publisher and logo
 		}
 	\end{titlepage}
 	\tableofcontents
 	\section{基础篇}
-	\subsection{}
+	\subsection{RISC-V简介}
+	\begin{enumerate}
+		\item{RISC-V发展过程}
+		\begin{enumerate}
+			\item 
+				RISC(精简指令集计算机)和CISC(复杂指令集计算机)是当前CPU的两种架构。早些年，市面上只有CISC指令集，后来IBM的研究员通过统计的方法发现，传统CISC处理器中，五分之一的指令承担了五分之四的工作，而剩下五分之四的指令基本没有被使用，或者很少使用，这样，既浪费了CPU的核心面积，增大了功耗，还降低了效率。于是，RISC应运而生。
+			\item
+				RISC的指令数目较CISC少，CISC中的一些复杂指令，RISC需要用多条简单指令来实现。但指令字等长，效率高，功耗低，并发性高。且内部寄存器丰富，更强调对寄存器的合理调用。但高性能RISC处理器成本高，性价比低，且不同公司的RISC芯片几乎无法通用，生态环境较X86的CISC而言更闭塞，通用性完全无法和X86相比，这就是RISC最大的弊端。
+			\item
+				20世纪末和21世纪初，市面上绝大多数核心指令集都是不开源的。2010年，加州大学伯克利分校的David A. Patterson教授团队在3个月内开发出完全开源指令集RISC-V，RISC-V指令集是基于精简指令集计算(RISC)原理建立的开放指令集架构(ISA)，RISC-V是在指令集不断发展和成熟的基础上建立的全新指令。RISC-V指令集完全开源，设计简单，易于移植Unix系统，模块化设计，完整工具链，同时有大量的开源实现和流片案例，已在社区得到大力支持。
+			\item
+				它虽然不是第一个开源的的指令集(ISA)，但它是第一个被设计成可以根据具体场景可以选择适合的指令集的指令集架构。基于RISC-V指令集架构可以设计服务器CPU、家用电器CPU、工控CPU和传感器中的CPU等。
+		\end{enumerate}
+		\begin{figure}[!htbp]
+			\centering
+			\includegraphics[scale=0.8]{img/one.png}
+		\end{figure}
+		\item{RISC-V指令结构}
+		\begin{enumerate}
+			\item 
+				RSICV指令集分为基本指令集I和扩展指令集M，A，F，D，C。基本指令集I是整数指令集，也是RISC-V中，对于任何处理器必须有的指令集，扩展指令集可有可无。
+			\item
+				{基本指令集有六种格式：}
+			\begin{enumerate}
+				
+				\item 	R 类型指令：用于寄存器 - 寄存器操作；
+				\item   I 类型指令：用于短立即数和访存 load 操作；
+				\item S 类型指令：用于访存 store 操作；
+				\item B 类型指令：用于条件跳转操作；
+				\item U 类型指令：用于长立即数操作；
+				\item J 类型指令：用于无条件操作；
+			\end{enumerate}
+			\begin{figure}[!htbp]
+				\centering
+				\includegraphics[scale=0.8]{img/two.png}
+			\end{figure}
+			\begin{figure}[!htbp]
+				\centering
+				\includegraphics[scale=0.5]{img/three.png}
+			\end{figure}
+		\end{enumerate}
+		
+		\subsection{蜂鸟E203简介}
+		\begin{enumerate}
+			\item{E203}
+			\begin{enumerate}
+				\item 蜂鸟E203 系列处理器由作者所在的公司开发，是一款开源的RISC-V 处理器。蜂鸟是世
+				界上最小的鸟类，其体积虽小，却有着极高的速度与敏锐度，可以说是“能效比”最高的鸟
+				类。E203 系列以蜂鸟命名便寓意于此，旨在将其打造成为一款世界上最高能效比的RISC 处理器。
+				\begin{figure}[!htbp]
+					\centering
+					\includegraphics[scale=0.8]{img/four.png}
+				\end{figure}
+			\end{enumerate}	
+			\item{E203核心数据通路分为几个模块}
+			\begin{enumerate}
+				\item IFU 取址单元
+				\item EXU 执行单元
+				\item LSU 访存单元
+				\item BIU 总线
+			\end{enumerate}	
+			\item{E203数据通路采用两级流程水线}
+			\begin{enumerate}
+				\item 第一级是IFU，包括，取址、分支预测、生成PC。
+				\item 第二级是译码、派遣、执行、访存、写回。
+			\end{enumerate}	
+			\item{E203特点}
+			\begin{enumerate}
+				\item 蜂鸟E203 处理器研发团队拥有在国际一流公司多年开发处理器的经验，使用稳健的。
+				\item 蜂鸟E203 的代码为人工编写，添加丰富的注释且可读性强，非常易于理解。
+				\item 蜂鸟E203 专为IoT 领域量身定做，其具有2 级流水线深度，功耗和性能指标均优于目前主流商用的ARM Cortex-M 系列处理器，且免费开源，能够在IoT 领域完美替代ARM Cortex-M 处理器。
+			\end{enumerate}	
+		\end{enumerate}	
+		\subsection{T-core开发板介绍}
+		\begin{enumerate}
+			\item T-core开发板是友晶科技公司的基于RISC-V的新款开发板。T-Core提供了围绕Intel MAX 10 FPGA构建的强大的硬件设计平台。它配备完善，可在控制平面或数据路径应用中提供具有成本效益的单芯片解决方案，并提供行业领先的可编程逻辑，以实现最终的设计灵活性。
+			\item 借助MAX 10 FPGA，可以获得比上一代更低的功耗/成本和更高的性能。可支持大量应用，包括协议桥接，电机控制驱动，模数转换和手持设备。T-Core开发板包括硬件，例如板载USB-Blaster II，QSPI Flash，ADC接头连接器，WS2812B RGB LED和2x6 TMD扩展接头连接器。通过利用所有这些功能，T-Core是展示，评估和原型化Intel MAX 10 FPGA真正潜力的理想解决方案。T-Core还通过板载JTAG调试支持RISC-V CPU。它是学习RISC-V CPU设计或嵌入式系统设计的理想平台。
+		\end{enumerate}	
+		\begin{figure}[!htbp]
+			\centering
+			\includegraphics[scale=1]{img/five.png}
+		\end{figure}
+		\begin{figure}[!htbp]
+			\centering
+			\includegraphics[scale=1]{img/six.jpg}
+		\end{figure}
+	\end{enumerate}
 	\section{实践篇}
 	
 	\begin{figure}[H]
