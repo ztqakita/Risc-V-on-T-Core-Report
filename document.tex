@@ -184,56 +184,323 @@
 				\item 
 					借助MAX 10 FPGA，可以获得比上一代更低的功耗/成本和更高的性能。可支持大量应用，包括协议桥接，电机控制驱动，模数转换和手持设备。T-Core开发板包括硬件，例如板载USB-Blaster II，QSPI Flash，ADC接头连接器，WS2812B RGB LED和2x6 TMD扩展接头连接器。通过利用所有这些功能，T-Core是展示，评估和原型化Intel MAX 10 FPGA真正潜力的理想解决方案。T-Core还通过板载JTAG调试支持RISC-V CPU。它是学习RISC-V CPU设计或嵌入式系统设计的理想平台。
 			\end{enumerate}	
-			\begin{figure}[!htbp]
-				\centering
-				\includegraphics[scale=1]{img/five.png}
-			\end{figure}
-			\begin{figure}[!htbp]
-				\centering
-				\includegraphics[scale=1]{img/six.jpg}
-			\end{figure}
+	
+		\subsection{T-core开发板介绍}
+		\begin{enumerate}
+			\item T-core开发板是友晶科技公司的基于RISC-V的新款开发板。T-Core提供了围绕Intel MAX 10 FPGA构建的强大的硬件设计平台。它配备完善，可在控制平面或数据路径应用中提供具有成本效益的单芯片解决方案，并提供行业领先的可编程逻辑，以实现最终的设计灵活性。
+			\item 借助MAX 10 FPGA，可以获得比上一代更低的功耗/成本和更高的性能。可支持大量应用，包括协议桥接，电机控制驱动，模数转换和手持设备。T-Core开发板包括硬件，例如板载USB-Blaster II，QSPI Flash，ADC接头连接器，WS2812B RGB LED和2x6 TMD扩展接头连接器。通过利用所有这些功能，T-Core是展示，评估和原型化Intel MAX 10 FPGA真正潜力的理想解决方案。T-Core还通过板载JTAG调试支持RISC-V CPU。它是学习RISC-V CPU设计或嵌入式系统设计的理想平台。
+		\end{enumerate}	
+		\begin{figure}[H]
+			\centering
+			\includegraphics[scale=1]{img/five.png}
+		\end{figure}
+		\begin{figure}[H]
+			\centering
+			\includegraphics[scale=1]{img/six.jpg}
+		\end{figure}
 
 	\section{实践篇}
+	\subsection{硬件开发}
 	
-	\begin{figure}[H]
-		\centering  
-		\includegraphics[scale=0.7]{img/avatar.jpg}   
-		\caption{DHCP Request包字节形式}
-	\end{figure}
-
+	\subsection{软件开发}
+	我们需要根据我们设计的指令格式修改编译器，使其能够编译dot指令，并将其转换为对应的机器码。这样，编译器就可以将包含dot指令的测试程序编译成可执行文件，供硬件执行。
 	\begin{enumerate}
-		\item 
-	\end{enumerate}
-
-	\begin{itemize}
-		\item 
-	\end{itemize}
-
-	\begin{lstlisting}[language={C++}]
-	class Pokemon : public QObject  	//代码
-	\end{lstlisting}
+		\item 生成操作码宏定义
+		\begin{itemize}
+			\item 文件包riscv-opcodes中枚举了全部RISC-V指令的操作码信息。因为我们设计的dot指令属于rv32i指令集，因此需要在opcodes-rv32i文件中加入我们编写的dot指令的指令格式。
+				\begin{figure}[H]
+					\centering  
+					\includegraphics[scale=0.3]{img/1.png}   
+					\caption{riscv-opcodes文件包}
+				\end{figure}
+				\begin{figure}[H]
+					\centering  
+					\includegraphics[scale=0.5]{img/2.png}   
+					\caption{修改 opcodes-rv32i 文件}
+				\end{figure}
+			\item 运用转换脚本parse\_opcodes生成编译器所需要的信息，即C语言格式的宏定义，存放在dot.h中
+				\begin{figure}[H]
+					\centering  
+					\includegraphics[scale=0.8]{img/changeopcodes.JPG} 
+					\caption{用脚本转换 opcodes}
+				\end{figure}
+		\end{itemize}
 	
-	\begin{table}[H]
-		\centering
-		\begin{tabular}{lll}
-			\hline
-			字段 & 值 & 含义 \\ \hline
-			包头长度 & 45 & 数据分组首部长度20字节 \\ \hline
-			服务类型 & 00 & 正常时延、正常吞吐量、正常可靠性 \\ \hline
-			总长度 & 003c & 数据分组长度60字节 \\ \hline
-			标识 & 5c6e & 标识为23662 \\ \hline
-			标志 & 00 & MF=0：此片为最后一片，DF=0：允许分片 \\ \hline
-			片偏移 & 00 & 偏移量=0 \\ \hline
-			TTL & 40 & 每跳生存周期为64 \\ \hline
-			协议 & 01 & 来自ICMP协议 \\ \hline
-			头部校验和 & 0000 & IP头部检验和为0000 \\ \hline
-			源地址 & c0a86386 & 源地址为192.168.99.134 \\ \hline
-			目的地址 & 72ff28a6 & 目的地址为114.255.40.166 \\ \hline
-		\end{tabular}
-	\end{table}
+		\item 修改 RISC-V GNU工具链
+		\\RISC-V GNU工具链是一组用于支持RISC-V C和C++的交叉编译工具链，这些工具构成了一个完整的系统。GNU工具链包括riscv-gcc、riscv-glibc等子仓库。
+		\begin{itemize}
+			\item 从gitee上下载完整的工具链后，打开 "riscv-gnu-toolchain/riscv-binutils/include/opcode" 路径下的 riscv-opc.h 文件，将第1步中生成的dot指令相关的定义和代码复制到该文件中。
+				\begin{figure}[H]
+					\centering  
+					\includegraphics[scale=0.8]{img/3.png} 
+					\caption{更改工具链}
+				\end{figure}
+				\begin{figure}[H]
+					\centering   
+					\includegraphics[scale=0.7]{img/4.png} 
+					\caption{更改工具链}
+				\end{figure}
+			\item 打开 "riscv-gnu-toolchain/riscv-binutils/opcodes" 路径下的 riscv-opc.c 文件，找到定义的 riscv\_opcodes 结构体，在其中添加dot指令
+				\begin{figure}[H]
+					\centering  
+					\includegraphics[scale=0.5]{img/5.png} 
+					\caption{更改工具链}
+				\end{figure}
+			\item 修改完成后，我们需要安装一些编译依赖，然后就可以重新编译生成工具链了，此过程较长，需要20分钟左右。
+				\begin{figure}[H]
+					\centering  
+					\includegraphics[scale=0.8]{img/COMPILE.JPG} 
+					\caption{编译工具链}
+				\end{figure}
+		\end{itemize}
+		
+		\item 测试指令
+			\begin{itemize}
+				\item 首先在 dot\_try 文件夹下新建一个 tool\_test
+				文件夹，并在其中新建 dot.c 文件，用于测试 dot 指令是否可以被正常编译。
+					\begin{figure}[H]
+						\centering  
+						\includegraphics[scale=0.6]{img/6.png} 
+						\caption{编写测试程序}
+					\end{figure}
+				\item 调用 gcc 编译 dot.c 文件，如果成功修改了工具链，就会生成 dot 文件。
+					\begin{figure}[H]
+						\centering  
+						\includegraphics[scale=0.8]{img/makedot.JPG} 
+						\caption{调用 gcc 编译}
+					\end{figure}
+				\item 进行汇编代码查看。可以在 dot2\_test、dot3\_test、dot4\_test 函数的片段中，找到生成的 dot 汇编指令。
+					\begin{figure}[H]
+						\centering  
+						\includegraphics[scale=0.7]{img/7.png} 
+						\caption{查看 dot 指令}
+					\end{figure}		
+			\end{itemize}
+		\item 创建程序文件
+		\begin{itemize}
+			\item 在 "demo\_dot" 文件夹下创建一个 "demo\_dot.c" 的文本文档。包含以下头文件。
+			\begin{lstlisting}[language={C++}]
+				#include <stdio.h>
+				#include <stdlib.h>
+				#include <stdbool.h>
+				#include <stdatomic.h>
+				#include "encoding.h"
+				#include <platform.h>  
+			\end{lstlisting}
+			\item 宏定义，三个常数 CONST\_I、CONST\_K、CONST\_J 分别为 32、64、32，定义标识符
+			A\_ROW（矩阵 A 的行）为 CONST\_I，定义 A\_COL（矩阵 A 的列）为 CONST\_K；定义标识符
+			B\_ROW（矩阵 B 的行）为 CONST\_K，定义 B\_COL（矩阵 B 的列）为 CONST\_J；定义标识符
+			RES\_ROW（乘法运算得到的新矩阵的行）为 CONST\_I，定义 A\_COL（乘法运算得到的新矩阵的
+			列）为 CONST\_J。
+			\begin{lstlisting}[language={C++}]
+				// matrix dimensions
+				// CONST_K must set as multiple of 4 for dot instruction
+				#define CONST_I 32
+				#define CONST_K 64
+				#define CONST_J 32
+				//a[const_i][const_k]
+				#define A_ROW CONST_I
+				#define A_COL CONST_K
+				//b[const_k][const_j]
+				#define B_ROW CONST_K
+				#define B_COL CONST_J
+				//res[const_i][const_j]
+				#define RES_ROW CONST_I
+				#define RES_COL CONST_J  
+			\end{lstlisting}
+			\item 定义 demo\_uart\_init 函数，用于初始化，首先配置 GPIO\_IOF\_EN 对应的比特位为 1，使能 IOF 模
+			式，再将 GPIO\_IOF\_SEL 对应的比特位清零，选择 IOF0，再配置 UART\_DIV 寄存器，设置波特
+			率约为 115200。最后配置 UART\_TXCTRL 和UART\_RXCTRL，将 UART0 的 TX 和 RX 使能。
+			\begin{lstlisting}[language={C++}]
+				void uart_init(){
+					// Configure UART to print
+					GPIO_REG(GPIO_IOF_EN) |= IOF0_UART0_MASK;
+					GPIO_REG(GPIO_IOF_SEL) &= ~IOF0_UART0_MASK;
+					// 115200 Baud Rate
+					// get_cpu_freq() / baud_rate - 1, and get_cpu_freq() = 16MHz
+					UART0_REG(UART_REG_DIV) = 138;
+					UART0_REG(UART_REG_TXCTRL) |= UART_TXEN; // enable tx
+					UART0_REG(UART_REG_RXCTRL) |= UART_RXEN; // enable rx
+				}
+			\end{lstlisting}
+			\item 主函数中，首先进行 UART 的初始化, 并定义 i、j、k 变量分别用于遍历矩阵的行和列，reg 变量作为 dot 指令算法输出矩阵的寄存器，incr变量作为运算步长。
+			\begin{lstlisting}[language={C++}]
+				int main(int argc, char *argv[]) {
+					uart_init();
+					int i = 0, j = 0, 1 k = 0, reg = 0, incr = 4;			
+				\end{lstlisting}
+				\item 打印 "Malloc and initial Matrixs!!" 字符串，定义四个指针变量，并使用 malloc 函数分配 A 矩阵、B矩阵、未使用 dot 指令进行矩阵相乘得到的新矩阵、使用 dot 指令进行矩阵相乘得到的新矩阵所需的内存空间，并返回一个指针，指向已分配大小的内存。
+				\begin{lstlisting}[language={C++}]
+					// malloc and init matrixs
+					printf("Malloc and initial Matrixs!!\n\n");
+					// matrix stored as an array of size row * column
+					int *a = NULL, *b = NULL, *no_dot_res = NULL, *dot_res = NULL;
+					a = (int*) malloc(A_ROW * A_COL * sizeof(int));
+					b = (int*) malloc(B_ROW * B_COL * sizeof(int));
+					no_dot_res = (int*) malloc(RES_ROW * RES_COL * sizeof(int));
+					dot_res = (int*) malloc(RES_ROW * RES_COL * sizeof(int));			
+				\end{lstlisting}
+				\item 初始化矩阵 A 和矩阵 B，初始化矩阵 A 和矩阵 B 相乘的两种运算方式的结果矩阵。
+				\begin{lstlisting}[language={C++}]
+					// initialization matrix A
+					for(i = 0; i < A_ROW; i++) {
+						for (j = 0; j < A_COL; j++) {
+							a[i * A_COL + j] = i * A_COL + j;
+						}
+					}
+					// initialization matrix B
+					for(i = 0; i < B_ROW; i++) {
+						for (j = 0; j < B_COL; j++) {
+							b[i * B_COL + j] = i * B_COL + j;
+						}
+					}
+					// initialization matrix no_dot_res,dot_res
+					for(i = 0; i < RES_ROW; i++) {
+						for (j = 0; j < RES_COL; j++) {
+							no_dot_res[i * RES_COL + j] = 0;
+							dot_res [i * RES_COL + j] = 0;
+						}
+					}		
+				\end{lstlisting}
+				\item RISC-V 定义了 3 个 64 位计数器，分别为：instret、cycle、time，这三个寄存器可以用来评估硬件性能。其中，instret 计数器统计自 CPU 复位以来共运行了多少条指令；cycle 计数器统计自 CPU 复位以来共运行了多少个周期；time 计数器统计自CPU 复位以来共运行了多少时间，驱动 time 计数器是已知的固定频率的时钟，例如 32768Hz 的时钟。
+				采用常规算法进行矩阵的乘法运算。并调用 get\_instret\_value()、get\_cycle\_value()、
+				get\_timer\_value() 三个函数，通过计算得到这种运算方式的指令数、周期数以及运行的时间。
+				\begin{lstlisting}[language={C++}]
+					// no dot instruction(traditional tile matrix multipication)
+					printf("Matrix multiplication without using custom DOT instruction:
+					\n");
+					unsigned int no_dot_instret_start = get_instret_value();
+					unsigned int no_dot_cycle_start = get_cycle_value();
+					unsigned int no_dot_timer_start = get_timer_value();
+					for (i = 0; i < RES_ROW; i++) {
+						for (j = 0; j < RES_COL; j++) {
+							for (k = 0; k < CONST_K; k++) {
+								no_dot_res[i * RES_COL + j] += a[i * A_COL + k] * b[k *
+								B_COL + j];
+							}
+						}
+					}
+					unsigned int no_dot_timer_cost = get_timer_value() -
+					no_dot_timer_start;
+					unsigned int no_dot_cycle_cost = get_cycle_value() -
+					no_dot_cycle_start;
+					unsigned int no_dot_instret_cost = get_instret_value() -
+					no_dot_instret_start;
+					printf("not_dot time cost: %0.2fms\n",
+					(float)no_dot_timer_cost/RTC_FREQ*1000);
+					printf("not_dot_cycle: %u\n", no_dot_cycle_cost);
+					printf("not_dot_instret: %u\n", no_dot_instret_cost);
+					printf("not_dot CPI: %.2f\n\n",
+					(float)no_dot_cycle_cost/no_dot_instret_cost);	
+				\end{lstlisting}
+				\item 采用 dot2、dot3、dot4 指令进行矩阵的乘法运算。并调用 get\_instret\_value()、get\_cycle\_value()、get\_timer\_value()三个函数，通过计算得到这种运算方式的指令数、周期数以及运行的时间。
+				\begin{lstlisting}[language={C++}]
+					unsigned int dot_instret_start = get_instret_value();
+					unsigned int dot_cycle_start = get_cycle_value();
+					unsigned int dot_timer_start = get_timer_value(); 
+					
+					for (i = 0; i < RES_ROW; i++) {
+						for (j = 0; j < RES_COL; j++) {
+							int k = 0;
+							
+							asm volatile (
+							"lw x10, %[a0]\t\n"
+							"lw x11, %[a1]\t\n"
+							"lw x12, %[a2]\t\n"
+							"lw x13, %[a3]\t\n"
+							"lw x14, %[a4]\t\n"
+							"lw x15, %[a5]\t\n"
+							"lw x16, %[a6]\t\n"
+							"lw x17, %[a7]\t\n"
+							"dot4 %[output], x12, x13\t\n"
+							: [output]"=r"(reg)
+							: [a0]"m"(a[i * A_COL + (k + 0)])
+							,[a1]"m"(a[i * A_COL + (k + 1)])
+							,[a2]"m"(a[i * A_COL + (k + 2)])
+							,[a3]"m"(a[i * A_COL + (k + 3)])
+							,[a4]"m"(b[(k + 0) * B_COL + j])
+							,[a5]"m"(b[(k + 1) * B_COL + j])
+							,[a6]"m"(b[(k + 2) * B_COL + j])
+							,[a7]"m"(b[(k + 3) * B_COL + j])
+							: "x10","x11","x12","x13"
+							,"x14","x15","x16","x17"
+							);
+							
+							dot_res[i * RES_COL + j] += reg;
+							k += 4;
+							
+							asm volatile (
+							"lw x10, %[a0]\t\n"
+							"lw x11, %[a1]\t\n"
+							"lw x12, %[a2]\t\n"
+							"lw x13, %[a3]\t\n"
+							"lw x14, %[a4]\t\n"
+							"lw x15, %[a5]\t\n"
+							"dot3 %[output], x12, x13\t\n"
+							: [output]"=r"(reg)
+							: [a0]"m"(a[i * A_COL + (k + 0)])
+							,[a1]"m"(a[i * A_COL + (k + 1)])
+							,[a2]"m"(a[i * A_COL + (k + 2)])
+							,[a3]"m"(b[(k + 0) * B_COL + j])
+							,[a4]"m"(b[(k + 1) * B_COL + j])
+							,[a5]"m"(b[(k + 2) * B_COL + j])
+							: "x10","x11","x12","x13"
+							,"x14","x15"
+							);
+							
+							dot_res[i * RES_COL + j] += reg;			   
+						}
+					}
+					
+					unsigned int dot_timer_cost   = get_timer_value() - dot_timer_start;
+					unsigned int dot_cycle_cost   = get_cycle_value() - dot_cycle_start;
+					unsigned int dot_instret_cost = get_instret_value() - dot_instret_start;
+					
+					printf("dot time cost: %.2fms\n", (float)dot_timer_cost/RTC_FREQ*1000);
+					printf("dot_cycle: %u\n", dot_cycle_cost);
+					printf("dot_instret: %u\n", dot_instret_cost);
+					printf("dot CPI: %.2f\n\n", (float)dot_cycle_cost/dot_instret_cost);	
+				\end{lstlisting}
+				\item 对比两种运算方式的结果是否一致，来验证采用 dot 指令进行矩阵的乘法运算的结果是否是正确的。
+				\begin{lstlisting}[language={C++}]
+					// verify the no_dot_res and dot_res array are equal
+					printf("Matrix multiplication result verification: \n");
+					int verifyRes = 1;
+					for(i = 0;i < RES_ROW * RES_COL; i++) {
+						if(dot_res[i] != no_dot_res[i]) {
+							verifyRes = 0;
+							break;
+						}
+					}
+					if(verifyRes)
+					printf("Pass!\n\n");
+					else
+					printf("Fail!\n\n");	
+				\end{lstlisting}
+				\item 计算两种运算方式的指令数、周期数以及运行的时间的比值，并打印出来。最后释放由 malloc() 函数申请的内存空间。
+				\begin{lstlisting}[language={C++}]
+					printf("Ratio of timer: %.2f\n",
+					(float)no_dot_timer_cost/dot_timer_cost );
+					printf("Ratio of cycle: %.2f\n",
+					(float)no_dot_cycle_cost/dot_cycle_cost );
+					printf("Ratio of instret (retired instruction): %.2f\n",
+					(float)no_dot_instret_cost/dot_instret_cost );	
+					// free matrix
+					free(a);
+					free(b);
+					free(no_dot_res);
+					free(dot_res);
+					return 0;
+				}
+			\end{lstlisting}
+			
+		\end{itemize}
+	\end{enumerate}	
+
+	\section{结果展示}	
 	
-	\section{结果展示}
 	
 	\section{未来展望}
+	
 	
 \end{document}
