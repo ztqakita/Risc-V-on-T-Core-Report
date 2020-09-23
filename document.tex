@@ -201,11 +201,98 @@
 
 	\section{实践篇}
 	\subsection{硬件开发}
+	我们在Quartus上通过Verilog语言对CPU中的EXU执行单元模块进行修改，修改的步骤大致分为以下几个方面：
+	\begin{itemize}
+		\item 增加DOT4、DOT3、DOT2指令的宏定义；
+		\item 给出DOT4、DOT3、DOT2的译码条件，加入ALU运算集，连接ALU INFO总线；
+		\item 声明a0-a7的端口，把这8个端口对应到x10-x17寄存器上；
+		\item 如果OITF中有长指令正在维护并且要写回目的寄存器 x10-x17 中的话，那就有数据冒险，不可以派遣；
+		\item 把传来八个寄存器转到ALU；
+		\item 编写DOT4、DOT3、DOT2指令的ALU逻辑实现模块，并将得到的结果写回。
+	\end{itemize}
+	硬件修改的数据通路图如下图所示，我们将在红圈的地方进行增添和修改。
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.8]{img/datalink.jpg}
+		\caption{硬件数据通路图及修改部分}
+	\end{figure}
+	\subsubsection{宏定义修改}
+	为了增加ALU的多路选择数，我们在宏定义中增加三条选择线路，分别连接DOT4、DOT3、DOT2的自定义逻辑功能模块，对应的修改为将ALU的宏定义宽度加3：
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=1]{img/define.jpg}
+		\caption{宏定义修改说明}
+	\end{figure}
 	
+	\subsubsection{译码模块修改}
+	将DOT4、DOT3、DOT2的指令字段确定之后，给出其译码的条件，并将其放入ALU运算集合之中。之后还需将这三个指令的译码信息放入总线用于数据交换。
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.7]{img/decode.jpg}
+		\caption{译码模块修改说明}
+	\end{figure}
+	
+	\subsubsection{寄存器堆模块修改}
+	该处的修改较为简单，主要工作是声明a0-a7这8个端口，并分别对应到寄存器堆中x10-x17这8个寄存器.这里需要强调一下，使用这8个寄存器是由于他们均为函数调用的传参寄存器，在运行过程中使用几率较小，所以产生冲突的可能性更小，从而保证更高的处理效率。
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.6]{img/register.jpg}
+		\caption{寄存器堆修改说明}
+	\end{figure}
+
+	\subsubsection{OITF模块修改}
+	e203解决结构冒险是用到了握手机制。用一个 op\_ready信号 \& op信号进行判断，若为1就可以派遣， 若不为1就不能派遣。若正在执行乘法，下一条还是乘法， 此时op\_ready就是0，op就是1，与后等于0，无法派遣。如果正在执行乘法，下一条是跳转指令 op\_ready就是1，op为1，与后等于1，可以派遣。
+	
+	运用这个机制，我们对我们所使用的8个寄存器进行冲突判断。在e203中，有一种特殊定义的长指令，在派遣后还需执行几个周期，访存相关的指令。e203在执行长指令的时候，OITF指令会把相关信息压入OITF中，执行完释放，这叫做维护或数据依赖性，维护期间如果来了一个非长指令，就很有可能冲突。所以OITF就是用来判断是否会发生长指令和非长指令的冲突。
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.8]{img/OITF.jpg}
+		\caption{OITF模块修改说明}
+	\end{figure}
+	
+	\subsubsection{派遣模块修改}
+	派遣模块需要修改两个部分，一个是针对OITF反馈的派遣信息的响应，一个是针对寄存器值派遣给ALU模块的赋值过程。
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.6]{img/dispatch1.jpg}
+		\caption{OITF反馈的派遣信息的响应}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.6]{img/dispatch2.jpg}
+		\caption{寄存器值派遣给ALU模块的赋值过程}
+	\end{figure}
+
+	\subsubsection{ALU模块修改}
+	首先需要接收到来自总线上关于DOT指令的控制信息，来指示ALU当前需要执行DOT指令的操作。接着我们在ALU的数据通路模块中增加自定义逻辑模块，将我们想实现的三种子块矩阵乘法写入相应位置中。在最后我们需要将ALU输出的结果存入相应的寄存器中，来保证结果被缓存而不被覆盖。
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.7]{img/alu.jpg}
+		\caption{DOT4的自定义逻辑实现}
+	\end{figure}
+
+	以上便是所有硬件修改的流程，在完成修改之后，我们需要对Quartus工程项目进行编译，若编译成功，证明修改完全正确。编译之后会在outfile文件夹中得到pof文件，这个文件正是需要我们烧写进T-Core的文件。
+	
+	\subsubsection{烧写POF文件到T-Core开发板}
+	\begin{itemize}
+		\item 设置T-Core开发板的SW2开关：SW2.1=0，SW2.2=1。
+		\begin{figure}[H]
+			\centering
+			\includegraphics[scale=0.7]{img/jtag.jpg}
+			\caption{JTAG 切换模式}
+		\end{figure}
+		\item 用Mini USB线连接T-Core开发板的J2接口与主机。
+		\item 打开Quartus的Programmer工具， 点击Hardware Setup...，选择T-Core，然后点击Auto Detect。选择当前T-Core开发板的MAX 10 FPGA器件，点击change file按钮并选择刚刚生成好的POF文件，勾号选项之后点击start开始烧写。
+		\begin{figure}[H]
+			\centering
+			\includegraphics[scale=0.7]{img/pof.jpg}
+			\caption{PROGRAMMER 界面操作一览}
+		\end{figure}
+		
+	\end{itemize}	
 	\subsection{软件开发}
 	我们需要根据我们设计的指令格式修改编译器，使其能够编译dot指令，并将其转换为对应的机器码。这样，编译器就可以将包含dot指令的测试程序编译成可执行文件，供硬件执行。
-	\begin{enumerate}
-		\item 生成操作码宏定义
+	\subsubsection{生成操作码宏定义}
 		\begin{itemize}
 			\item 文件包riscv-opcodes中枚举了全部RISC-V指令的操作码信息。因为我们设计的dot指令属于rv32i指令集，因此需要在opcodes-rv32i文件中加入我们编写的dot指令的指令格式。
 				\begin{figure}[H]
@@ -226,8 +313,8 @@
 				\end{figure}
 		\end{itemize}
 	
-		\item 修改 RISC-V GNU工具链
-		\\RISC-V GNU工具链是一组用于支持RISC-V C和C++的交叉编译工具链，这些工具构成了一个完整的系统。GNU工具链包括riscv-gcc、riscv-glibc等子仓库。
+		\subsubsection{修改 RISC-V GNU工具链}
+		RISC-V GNU工具链是一组用于支持RISC-V C和C++的交叉编译工具链，这些工具构成了一个完整的系统。GNU工具链包括riscv-gcc、riscv-glibc等子仓库。
 		\begin{itemize}
 			\item 从gitee上下载完整的工具链后，打开 "riscv-gnu-toolchain/riscv-binutils/include/opcode" 路径下的 riscv-opc.h 文件，将第1步中生成的dot指令相关的定义和代码复制到该文件中。
 				\begin{figure}[H]
@@ -254,7 +341,7 @@
 				\end{figure}
 		\end{itemize}
 		
-		\item 测试指令
+		\subsubsection{测试指令}
 			\begin{itemize}
 				\item 首先在 dot\_try 文件夹下新建一个 tool\_test
 				文件夹，并在其中新建 dot.c 文件，用于测试 dot 指令是否可以被正常编译。
@@ -276,7 +363,7 @@
 						\caption{查看 dot 指令}
 					\end{figure}		
 			\end{itemize}
-		\item 创建程序文件
+		\subsubsection{创建程序文件}
 		\begin{itemize}
 			\item 在 "demo\_dot" 文件夹下创建一个 "demo\_dot.c" 的文本文档。包含以下头文件。
 			\begin{lstlisting}[language={C++}]
@@ -495,12 +582,16 @@
 			\end{lstlisting}
 			
 		\end{itemize}
-	\end{enumerate}	
 
 	\section{结果展示}	
 	
 	
 	\section{未来展望}
+	\subsection{可以改进的地方}
+	对于$1\times4$乘以$4\times1$的矩阵乘法而言，会需要用到8个寄存器。我们可以在此基础上增加更多的寄存器以在一个周期内实现更大的矩阵乘法操作，例如$1\times5$乘以$5\times1$等，甚至可以到$1\times8$乘以$8\times1$，用到16个寄存器(这种情况应该是行不通的)。这种思想便是占用更多的空间开销来换取时间上的效率提升。
+	
+	\subsection{对FPGA的理解}
+	FPGA是可编程逻辑器件，我们通过Risc-V指令集和FPGA开发中领悟到，如今的硬件设计越来越自主化和多样化，甚至可以进行自定义逻辑指令和相应的硬件数据通路设计。这种极高的自由度给计算机行业带来新的机遇，对于遇到诸多瓶颈的软件算法优化而言，利用FPGA硬件设计加速优化软件算法，会成为突破现有瓶颈的关键技术。如今可以在诸多论文中发现硬件设计的比重越来越大，人们逐渐将理论算法优化中无法解决的问题尝试带到硬件设计进行优化。
 	
 	
 \end{document}
