@@ -102,12 +102,16 @@
 				\end{enumerate}
 				\begin{figure}[!htbp]
 					\centering
-					\includegraphics[scale=0.8]{img/one.png}
+					\includegraphics[scale=0.7]{img/one.png}
 				\end{figure}
-			\subsubsection{RISC-V指令结构}
+			\subsubsection{RISC-V指令简述}
 				\begin{enumerate}
 					\item 
 						RSICV指令集分为基本指令集I和扩展指令集M，A，F，D，C。基本指令集I是整数指令集，也是RISC-V中，对于任何处理器必须有的指令集，扩展指令集可有可无。
+						\begin{figure}[!htbp]
+							\centering
+							\includegraphics[scale=0.6]{img/two.png}
+						\end{figure}
 					\item
 						基本指令集有六种格式：
 					\begin{enumerate}		
@@ -126,13 +130,275 @@
 					\end{enumerate}
 					\begin{figure}[!htbp]
 						\centering
-						\includegraphics[scale=0.8]{img/two.png}
-					\end{figure}
-					\begin{figure}[!htbp]
-						\centering
 						\includegraphics[scale=0.5]{img/three.png}
 					\end{figure}
 				\end{enumerate}
+			\subsubsection{RISC-V指令分述}
+			\begin{enumerate}
+				\item{R型指令:}
+					\begin{enumerate}
+						\item{简介:}
+							\subitem
+								R型指令包含简单的运算指令，由两个32位源寄存器（rs1，rs2）进行运算，
+								得到的结果存入一个32位目的寄存器（rd）。R型指令的6位操作码（opcode）
+								是固定的，由功能码（func7和func3）确定是何种运算。
+								\begin{figure}[!htbp]
+									\centering
+									\includegraphics[scale=0.5]{img/r1.png}
+								\end{figure}
+						\item{数据通路\&指令执行流程:}
+							\begin{figure}[!htbp]
+								\centering
+								\includegraphics[scale=0.5]{img/r2.png}
+							\end{figure}
+							\begin{enumerate}
+								\item
+									首先按照PC中的地址，从指令存储器中读出32位指令，然后PC+4;
+								\item
+									指令被送入控制器，控制器根据功能码和操作码确定这是R型指令中的某一条指令，并产生控制信号ALUSel和RegWEn;
+								\item
+									将指令的rs1、rs2、rd字段分别送到寄存器堆的相应地址端，寄存器根据rs1和rs2字段的地址读出对应的寄存器的值Reg[rs1]和Reg[rs2];
+								\item
+									ALU根据控制信号ALUSel，对Reg[rs1]和Reg[rs2]进行相应的运算，得到运算结果;
+								\item
+									将运算结果送到寄存器堆的数据D端口，控制器产生的RegWEn信号使寄存器堆允许写入，寄存器堆根据地址D端口的地址将数据D端口的值写入相应的寄存器。
+							\end{enumerate}
+						\item{指令格式:}
+							\begin{figure}[!htbp]
+								\centering
+								\includegraphics[scale=0.5]{img/r3.png}
+							\end{figure}
+							\begin{figure}[!htbp]
+								\centering
+								\includegraphics[scale=0.6]{img/r4.png}
+							\end{figure}
+					\end{enumerate}
+				\item{I型指令:}
+					\begin{enumerate}
+						\item{简介:}
+							\subitem
+								I型指令包含简单的立即数运算指令和load指令。立即数运算指令是由一个32位源寄存器
+								（rs1）和指令中包含的立即数（经扩充后的）进行运算，将得到的结果存入一个32位目的
+								寄存器（rd）。I型指令中的立即数运算指令的6位操作码（opcode）固定，由功能码
+								（func7和func3）确定是何种运算。
+								\begin{figure}[!htbp]
+									\centering
+									\includegraphics[scale=0.5]{img/i1.png}
+								\end{figure}
+							\subitem
+								Load指令属于 I - type 型，其功能是完成存储器的读操作。
+								funct3字段表示读出存储器的数据的字长（32位、16位或8位）。
+								Load指令将rs1中的数据与12位立即数字段符号扩展相加所得到的结果
+								作为访问存储器的地址，即存储器地址 = Reg[rs1] + imm。接着，
+								将从存储器读出的数据存入目的寄存器rd中。
+								\begin{figure}[!htbp]
+									\centering
+									\includegraphics[scale=0.5]{img/il1.png}
+								\end{figure}
+						\item{数据通路\&指令执行流程:}
+							\begin{figure}[!htbp]
+								\centering
+								\includegraphics[scale=0.5]{img/i2.png}
+							\end{figure}
+							\begin{enumerate}
+								\item
+									首先按照PC中的地址，从指令存储器中读出32位指令，然后PC+4;
+								\item
+									指令被送入控制器，控制器根据功能码和操作码确定这是I型指令中的某一条指令，并产生控制信号ALUSel、ImmSel和RegWEn;
+								\item
+									将指令的rs1、rs2、rd字段分别送到寄存器堆的相应地址端，寄存器根据rs1和rs2
+									字段的地址读出对应的寄存器的值Reg[rs1]和Reg[rs2]（但此时Reg[rs2]没有用）;
+								\item
+									将指令的12位立即数字段送到立即数扩展电路，通过ImmSel信号的指示，将立即数扩展为32位，并送到多路选择器的一个端口;
+								\item
+									Bsel信号，控制多路选择器选择立即数的那个端口，将立即数传送到ALU的一个输入端;
+								\item
+									ALU根据控制信号ALUSel，对Reg[rs1]和扩展后的立即数进行相应运算，得到运算结果;
+								\item
+									将运算结果送到寄存器堆的数据D端口，寄存器堆根据地址D端口的值将运算结果写入相应的寄存器。
+							\end{enumerate}
+						\item{指令格式:}
+							\begin{figure}[!htbp]
+								\centering
+								\includegraphics[scale=0.5]{img/i3.png}
+							\end{figure}
+							\begin{figure}[!htbp]
+								\centering
+								\includegraphics[scale=0.6]{img/i4.png}
+							\end{figure}
+					\end{enumerate}
+				\item{S型指令:}
+					\begin{enumerate}
+						\item{简介:}
+							\subitem
+							S - type型指令包括Store 指令，其功能是完成存储器的写操作。
+							Store使用funct3字段选择Word，HalfWord，Byte。
+							Store指令将rs1中的数据与12位立即数字段符号扩展相加所得到的结果
+							作为访问存储器的地址，即存储器地址 = Reg[rs1] + imm。接着，将
+							rs2中的数据写入存储器相应地址中。
+								\begin{figure}[!htbp]
+									\centering
+									\includegraphics[scale=0.5]{img/s1.png}
+								\end{figure}
+						\item{数据通路\&指令执行流程:}
+							\begin{figure}[!htbp]
+								\centering
+								\includegraphics[scale=0.5]{img/s2.png}
+							\end{figure}
+							\begin{enumerate}
+								\item
+									首先按照PC中的地址，从指令存储器中读出32位指令，然后PC+4；
+								\item
+									指令中的控制码和功能码送到控制器中产生相应的控制信号；
+								\item
+									将rs1和rs2的地址送入寄存器堆，得到rs1寄存器的值Reg[rs1]，作为ALU的第一个输入端；rs2寄存器的值Reg[rs2]，作为DMEM写入地址的数据；
+								\item
+									将12位的立即数进行符号扩展，得到32位的立即数作为ALU的第二个输入端。此处控制信号Bsel=1，表示指令的立即数部分有效，二选一选择器输出立即数的内容；
+								\item
+									控制信号ALUSel = Add，指示ALU做加法运算，得到的地址送入数据存储器DMEM的地址接口，并注意此时控制信号MemRW = Write，使得数据存储器处于写状态；
+								\item 
+									DMEM接收到地址和数据后，将所选地址空间写入Reg[rs2]。
+							\end{enumerate}
+						\item{指令格式:}
+							\begin{figure}[!htbp]
+								\centering
+								\includegraphics[scale=0.5]{img/s3.png}
+							\end{figure}
+					\end{enumerate}
+				\item{B型指令:}
+					\begin{enumerate}
+						\item{简介:}
+							\subitem
+								B型指令的功能是比较寄存器rs1、rs2中的值，并根比较结果进行分支跳转。
+								funct3字段表示分支跳转的类型。B型指令中beq/bne需进行相等比较的计
+								算，blt/bltu与bge/bgeu需进行量值比较的计算。
+								\begin{figure}[!htbp]
+									\centering
+									\includegraphics[scale=0.5]{img/b1.png}
+								\end{figure}
+						\item{数据通路\&指令执行流程:}
+							\begin{figure}[!htbp]
+								\centering
+								\includegraphics[scale=0.5]{img/b2.png}
+							\end{figure}
+							\begin{enumerate}
+								\item
+									首先按照PC中的地址，从指令存储器中读出32位指令，然后PC+4；
+								\item
+									指令中的控制码和功能码送到控制器中产生相应的控制信号；
+								\item
+									将指令中的rs1和rs2的地址送入寄存器堆，得到对应的寄存器的值Reg[rs1]和Reg[rs2]；
+								\item
+									Reg[rs1]和Reg[rs2]被送入比较运算单元，比较后的结果送至控制器用于判断是否进行目标地址的跳转；
+								\item
+									将PC的值送至ALU的第一个输入端；
+								\item
+									将指令中的立即数字段送入立即数扩展电路，该电路输出一个32位的数，送至ALU的第二个输入端；
+								\item
+									若进行跳转，则由ALU计算出目标地址送至PC处。
+							\end{enumerate}
+						\item{指令格式:}
+							\begin{figure}[!htbp]
+								\centering
+								\includegraphics[scale=0.5]{img/b3.png}
+							\end{figure}
+					\end{enumerate}
+				\item{U型指令:}
+					\begin{enumerate}
+						\item{简介:}
+							\subitem
+								U型指令包含LUI和AUIPC，用于构建32位常数，由20位立即数，rd和操作码构成。
+								\begin{figure}[!htbp]
+									\centering
+									\includegraphics[scale=0.5]{img/u1.png}
+								\end{figure}
+						\item{数据通路\&指令执行流程:}
+							\begin{figure}[!htbp]
+								\centering
+								\includegraphics[scale=0.5]{img/u2.png}
+							\end{figure}
+							\begin{enumerate}
+								\item
+									首先按照PC中的地址，从指令存储器中读出32位指令，然后PC+4；
+								\item
+									指令中的控制码和功能码送到控制器中产生相应的控制信号；
+								\item
+									Bsel = 1使得ALU B端口输入扩展后的立即数，Asel = 1使得ALU A端口输入PC；
+								\item
+									将20位的立即数进行扩展（低12位填0），输入进ALU B端口；
+								\item
+									若是LUI指令，ALUsel = B(输出等于B端口输入）；若是AUIPC指令， ALUsel = Add(将扩展后的立即数与PC相加）；
+								\item
+									WBsel = 1使得ALU运算结果直接存入寄存器堆中rd所指寄存器；
+							\end{enumerate}
+						\item{指令格式:}
+							\begin{figure}[!htbp]
+								\centering
+								\includegraphics[scale=0.5]{img/u3.png}
+							\end{figure}
+					\end{enumerate}
+				\item{J型指令:}
+					\begin{enumerate}
+						\item{简介:}
+							\subitem
+								JAL/JALR的功能是无条件跳转到目标地址。其中JAL指令中目标地址为PC的值加上20位的立即数所表示的偏移量，JALR指令中目标地址为寄存器rs1的值加上12位的立即数所表示的偏移量。
+								JAL/JALR所需的计算类型只有加法运算。
+								\begin{figure}[!htbp]
+									\centering
+									\includegraphics[scale=0.5]{img/j11.png}
+								\end{figure}
+								\begin{figure}[!htbp]
+									\centering
+									\includegraphics[scale=0.5]{img/j12.png}
+								\end{figure}
+						\item{数据通路\&指令执行流程:}
+							\subitem
+								JAL
+							\begin{figure}[!htbp]
+								\centering
+								\includegraphics[scale=0.5]{img/j21.png}
+							\end{figure}
+							\begin{enumerate}
+								\item
+									首先按照PC中的地址，从指令存储器中读出32位指令，然后PC+4；
+								\item
+									指令中的控制码和功能码送到控制器中产生相应的控制信号；
+								\item
+									将PC的值送至ALU的第一个输入端；
+								\item
+									将指令中的立即数字段送入立即数扩展电路，该电路输出一个32位的数，送至ALU的第二个输入端；
+								\item
+									控制信号ALUSel = Add，指示ALU做加法运算，得到的结果即为目标地址，将其送至PC；
+								\item 
+									将原来PC+4的值写回到寄存器rd中；	
+							\end{enumerate}
+							\subitem
+								JALR
+							\begin{figure}[!htbp]
+								\centering
+								\includegraphics[scale=0.5]{img/j22.png}
+							\end{figure}
+							\begin{enumerate}
+								\item
+									首先按照PC中的地址，从指令存储器中读出32位指令，然后PC+4；
+								\item
+									指令中的控制码和功能码送到控制器中产生相应的控制信号；
+								\item
+									将指令中的rs1,rd的地址送入寄存器堆，得到rs1对应的寄存器的值Reg[rs1]，并送入ALU的第一个端口；
+								\item
+									将指令中的立即数字段送入立即数扩展电路，该电路输出一个32位的数，送至ALU的第二个输入端；
+								\item
+									控制信号ALUSel = Add，指示ALU做加法运算，得到的结果即为目标地址，将其送至PC；
+								\item 
+									将原来PC+4的值写回到寄存器rd中；	
+							\end{enumerate}
+						\item{指令格式:}
+							\begin{figure}[!htbp]
+								\centering
+								\includegraphics[scale=0.5]{img/j3.png}
+							\end{figure}
+					\end{enumerate}
+			\end{enumerate}
 
 		\subsection{蜂鸟E203简介}
 			\subsubsection{E203}
@@ -159,6 +425,12 @@
 						BIU 总线
 				\end{enumerate}	
 
+			\subsubsection{E203 Core 的代码架构}
+				\begin{figure}[!htbp]
+					\centering
+					\includegraphics[scale=0.5]{img/framework.png}   
+				\end{figure}
+
 			\subsubsection{E203 数据通路的两级流程水线}
 				\begin{enumerate}
 					\item 
@@ -184,20 +456,14 @@
 				\item 
 					借助MAX 10 FPGA，可以获得比上一代更低的功耗/成本和更高的性能。可支持大量应用，包括协议桥接，电机控制驱动，模数转换和手持设备。T-Core开发板包括硬件，例如板载USB-Blaster II，QSPI Flash，ADC接头连接器，WS2812B RGB LED和2x6 TMD扩展接头连接器。通过利用所有这些功能，T-Core是展示，评估和原型化Intel MAX 10 FPGA真正潜力的理想解决方案。T-Core还通过板载JTAG调试支持RISC-V CPU。它是学习RISC-V CPU设计或嵌入式系统设计的理想平台。
 			\end{enumerate}	
-	
-		\subsection{T-core开发板介绍}
-		\begin{enumerate}
-			\item T-core开发板是友晶科技公司的基于RISC-V的新款开发板。T-Core提供了围绕Intel MAX 10 FPGA构建的强大的硬件设计平台。它配备完善，可在控制平面或数据路径应用中提供具有成本效益的单芯片解决方案，并提供行业领先的可编程逻辑，以实现最终的设计灵活性。
-			\item 借助MAX 10 FPGA，可以获得比上一代更低的功耗/成本和更高的性能。可支持大量应用，包括协议桥接，电机控制驱动，模数转换和手持设备。T-Core开发板包括硬件，例如板载USB-Blaster II，QSPI Flash，ADC接头连接器，WS2812B RGB LED和2x6 TMD扩展接头连接器。通过利用所有这些功能，T-Core是展示，评估和原型化Intel MAX 10 FPGA真正潜力的理想解决方案。T-Core还通过板载JTAG调试支持RISC-V CPU。它是学习RISC-V CPU设计或嵌入式系统设计的理想平台。
-		\end{enumerate}	
-		\begin{figure}[H]
-			\centering
-			\includegraphics[scale=1]{img/five.png}
-		\end{figure}
-		\begin{figure}[H]
-			\centering
-			\includegraphics[scale=1]{img/six.jpg}
-		\end{figure}
+			\begin{figure}[!htbp]
+				\centering
+				\includegraphics[scale=1]{img/five.png}
+			\end{figure}
+			\begin{figure}[!htbp]
+				\centering
+				\includegraphics[scale=1]{img/six.jpg}
+			\end{figure}
 
 	\section{实践篇}
 	\subsection{硬件开发}
@@ -584,8 +850,17 @@
 		\end{itemize}
 
 	\section{结果展示}	
-	
-	
+		\begin{itemize}
+			\item 
+				常规矩阵运算与自定义矩阵乘法指令的运算耗时对比(49 x 49 大小的矩阵相乘)
+				\begin{figure}[!htbp]
+					\centering
+					\includegraphics[scale=0.4]{img/result.png}
+				\end{figure}
+			\item 
+				结果：耗时减少约83\%
+		\end{itemize}
+
 	\section{未来展望}
 	\subsection{可以改进的地方}
 	对于$1\times4$乘以$4\times1$的矩阵乘法而言，会需要用到8个寄存器。我们可以在此基础上增加更多的寄存器以在一个周期内实现更大的矩阵乘法操作，例如$1\times5$乘以$5\times1$等，甚至可以到$1\times8$乘以$8\times1$，用到16个寄存器(这种情况应该是行不通的)。这种思想便是占用更多的空间开销来换取时间上的效率提升。
