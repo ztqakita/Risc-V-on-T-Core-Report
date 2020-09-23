@@ -465,6 +465,33 @@
 				\includegraphics[scale=1]{img/six.jpg}
 			\end{figure}
 
+		\subsection{矩阵乘法运算指令及数据通路}
+		\begin{enumerate}
+			\item 常规矩阵运算与自定义矩阵乘法指令的对比 \\
+			
+			\item DOT 指令格式 \\
+			
+			
+			\item DOT 指令数据通路分析 \\
+			通过在ALU数据通路中增加几条选择线，可以实现在ALU中添加自定义逻辑单元，并通过译码信号使ALU输出该单元的计算结果。
+			\begin{figure}[!htbp]
+				\centering
+				\includegraphics[scale=1]{img/alu2.png}
+			\end{figure}
+			\begin{figure}[!htbp]
+				\centering
+				\includegraphics[scale=0.8]{img/datalink.jpg}
+			\end{figure}
+			\begin{itemize}
+				\item RegFile：8个寄存器完成1，4 x 4，1的矩阵乘法空间，并与Dispatch模块建立读取通道
+				\item Decode: 对指令进行译码
+				\item Dispatch：增加dot指令相关的信号，将取得的数值传入ALU
+				\item ALU：实现dot指令的实现
+				\item OITF：解决寄存器与长指令的存取目的寄存器之间的冲突；同时Dispatch模块负责处理冲突后的操作
+			\end{itemize}
+		\end{enumerate}
+		
+		
 	\section{实践篇}
 	\subsection{硬件开发}
 	我们在Quartus上通过Verilog语言对CPU中的EXU执行单元模块进行修改，修改的步骤大致分为以下几个方面：
