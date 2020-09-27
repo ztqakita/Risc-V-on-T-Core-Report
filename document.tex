@@ -467,10 +467,29 @@
 
 		\subsection{矩阵乘法运算指令及数据通路}
 		\begin{enumerate}
-			\item 常规矩阵运算与自定义矩阵乘法指令的对比 \\
-			
-			\item DOT 指令格式 \\
-			
+			\item 常规矩阵运算与自定义矩阵乘法指令的对比
+				\begin{itemize}
+					\item{以 1 x 4 与 4 x 1 大小的矩阵相乘为例}
+						\begin{figure}[!htbp]
+							\centering
+							\includegraphics[scale=0.5]{img/dot1.png}
+						\end{figure}
+					\item{常规计算需要的总周期数：71；DOT 指令需要的总周期数：1\\}
+						\begin{figure}[!htbp]
+							\centering
+							\includegraphics[scale=0.5]{img/dot2.png}
+						\end{figure}
+						(每条乘法指令：17个周期; 每条加法指令：1个周期)
+				\end{itemize}
+
+			\item DOT 指令格式\\
+			操作码字段(opcode)选用 1101011;将功能字段(funct3)定义为 000，
+			将 funct7 字段定义为 0000001;rs1 rs2 字段分别表示两个源操作数寄存器，
+			rd 字段表示目标寄存 器。(注:在实际运算的时候，rs1、rs2 是没有被使用到的)。
+				\begin{figure}[!htbp]
+					\centering
+					\includegraphics[scale=0.5]{img/dot3.png}
+				\end{figure}
 			
 			\item DOT 指令数据通路分析 \\
 			通过在ALU数据通路中增加几条选择线，可以实现在ALU中添加自定义逻辑单元，并通过译码信号使ALU输出该单元的计算结果。
@@ -877,6 +896,33 @@
 		\end{itemize}
 
 	\section{结果展示}	
+	\subsection{编译并上传C语言程序}
+		\begin{itemize}
+			\item{编译}\\
+				进入 dot\_try/TCORE-RISCV-E203/TRRV-E-SDK 路径下的 software 文件夹，
+				右键打开 terminal 终端，输入 make software PROGRAM=demo\_dot 命令编译应用程序
+			\item{连接T-Core及SIF子卡}
+				\begin{itemize}
+					\item
+						关闭 T-Core 开发板电源后，将开发板上的 SW2 设置为 SW2.1=1，SW2.2=0，
+						选择 RISC-V JTAG 链路。
+					\item
+						将 SIF 子卡连接到 T-Core 的 TMD 2×6 header (JP6)，并使用 USB miniB 线缆
+						将 SIF 子卡与 PC 连接。
+					\item
+						将 USB Blaster II 线缆的一端连接到开发板的 USB Blaster 接口(J2)，
+						另一端连接至 PC 主机的 USB 接口。
+						\begin{figure}[!htbp]
+							\centering
+							\includegraphics[scale=0.4]{img/connect.png}
+						\end{figure}
+				\end{itemize}	
+			\item{打开串口调试工具}\\
+				使用 sudo minicom 命令打开 linux 系统的串口调试工具。
+			\item{上传程序并执行}\\
+				使用 make upload PROGRAM=demo\_dot" 将可执行文件 demo\_dot 下载到 T-Core 开发板的 QSPI Flash 中。
+		\end{itemize}
+	\subsection{运行结果}
 		\begin{itemize}
 			\item 
 				常规矩阵运算与自定义矩阵乘法指令的运算耗时对比(49 x 49 大小的矩阵相乘)
