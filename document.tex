@@ -74,9 +74,9 @@
 		\hspace{0.05\textwidth} % Whitespace between the vertical line and title page text
 		\parbox[b]{0.75\textwidth}{ % Paragraph box for holding the title page text, adjust the width to move the title page left or right on the page
 			
-			{\Huge\bfseries  课程实验报告}\\[2\baselineskip] % Title
+			{\Huge\bfseries  FPGA课程实验报告}\\[2\baselineskip] % Title
 			{\LARGE\textit{RISC-V on T-Core}}\\[4\baselineskip] % Subtitle or further description
-			{\Large\textit{MaTrixV Team}} % Author name, lower case for consistent small caps
+			{\Large\textit{MaTrixV Team \\ \\ 成员：邓宇涛，王铭梓，王子澄，张天秋}} % Author name, lower case for consistent small caps
 			
 			\vspace{0.5\textheight} % Whitespace between the title block and the publisher
 			% {\noindent }\\[\baselineskip] % Publisher and logo
@@ -100,7 +100,7 @@
 					\item
 						它虽然不是第一个开源的的指令集(ISA)，但它是第一个被设计成可以根据具体场景可以选择适合的指令集的指令集架构。基于RISC-V指令集架构可以设计服务器CPU、家用电器CPU、工控CPU和传感器中的CPU等。
 				\end{enumerate}
-				\begin{figure}[!htbp]
+				\begin{figure}[H]
 					\centering
 					\includegraphics[scale=0.7]{img/one.png}
 				\end{figure}
@@ -108,7 +108,7 @@
 				\begin{enumerate}
 					\item 
 						RSICV指令集分为基本指令集I和扩展指令集M，A，F，D，C。基本指令集I是整数指令集，也是RISC-V中，对于任何处理器必须有的指令集，扩展指令集可有可无。
-						\begin{figure}[!htbp]
+						\begin{figure}[H]
 							\centering
 							\includegraphics[scale=0.6]{img/two.png}
 						\end{figure}
@@ -128,7 +128,7 @@
 						\item 
 							J 类型指令：用于无条件操作；
 					\end{enumerate}
-					\begin{figure}[!htbp]
+					\begin{figure}[H]
 						\centering
 						\includegraphics[scale=0.5]{img/three.png}
 					\end{figure}
@@ -142,12 +142,12 @@
 								R型指令包含简单的运算指令，由两个32位源寄存器（rs1，rs2）进行运算，
 								得到的结果存入一个32位目的寄存器（rd）。R型指令的6位操作码（opcode）
 								是固定的，由功能码（func7和func3）确定是何种运算。
-								\begin{figure}[!htbp]
+								\begin{figure}[H]
 									\centering
 									\includegraphics[scale=0.5]{img/r1.png}
 								\end{figure}
 						\item{数据通路\&指令执行流程:}
-							\begin{figure}[!htbp]
+							\begin{figure}[H]
 								\centering
 								\includegraphics[scale=0.5]{img/r2.png}
 							\end{figure}
@@ -164,11 +164,11 @@
 									将运算结果送到寄存器堆的数据D端口，控制器产生的RegWEn信号使寄存器堆允许写入，寄存器堆根据地址D端口的地址将数据D端口的值写入相应的寄存器。
 							\end{enumerate}
 						\item{指令格式:}
-							\begin{figure}[!htbp]
+							\begin{figure}[H]
 								\centering
 								\includegraphics[scale=0.5]{img/r3.png}
 							\end{figure}
-							\begin{figure}[!htbp]
+							\begin{figure}[H]
 								\centering
 								\includegraphics[scale=0.6]{img/r4.png}
 							\end{figure}
@@ -181,7 +181,7 @@
 								（rs1）和指令中包含的立即数（经扩充后的）进行运算，将得到的结果存入一个32位目的
 								寄存器（rd）。I型指令中的立即数运算指令的6位操作码（opcode）固定，由功能码
 								（func7和func3）确定是何种运算。
-								\begin{figure}[!htbp]
+								\begin{figure}[H]
 									\centering
 									\includegraphics[scale=0.5]{img/i1.png}
 								\end{figure}
@@ -191,12 +191,12 @@
 								Load指令将rs1中的数据与12位立即数字段符号扩展相加所得到的结果
 								作为访问存储器的地址，即存储器地址 = Reg[rs1] + imm。接着，
 								将从存储器读出的数据存入目的寄存器rd中。
-								\begin{figure}[!htbp]
+								\begin{figure}[H]
 									\centering
 									\includegraphics[scale=0.5]{img/il1.png}
 								\end{figure}
 						\item{数据通路\&指令执行流程:}
-							\begin{figure}[!htbp]
+							\begin{figure}[H]
 								\centering
 								\includegraphics[scale=0.5]{img/i2.png}
 							\end{figure}
@@ -218,11 +218,11 @@
 									将运算结果送到寄存器堆的数据D端口，寄存器堆根据地址D端口的值将运算结果写入相应的寄存器。
 							\end{enumerate}
 						\item{指令格式:}
-							\begin{figure}[!htbp]
+							\begin{figure}[H]
 								\centering
 								\includegraphics[scale=0.5]{img/i3.png}
 							\end{figure}
-							\begin{figure}[!htbp]
+							\begin{figure}[H]
 								\centering
 								\includegraphics[scale=0.6]{img/i4.png}
 							\end{figure}
@@ -236,12 +236,12 @@
 							Store指令将rs1中的数据与12位立即数字段符号扩展相加所得到的结果
 							作为访问存储器的地址，即存储器地址 = Reg[rs1] + imm。接着，将
 							rs2中的数据写入存储器相应地址中。
-								\begin{figure}[!htbp]
+								\begin{figure}[H]
 									\centering
 									\includegraphics[scale=0.5]{img/s1.png}
 								\end{figure}
 						\item{数据通路\&指令执行流程:}
-							\begin{figure}[!htbp]
+							\begin{figure}[H]
 								\centering
 								\includegraphics[scale=0.5]{img/s2.png}
 							\end{figure}
@@ -260,7 +260,7 @@
 									DMEM接收到地址和数据后，将所选地址空间写入Reg[rs2]。
 							\end{enumerate}
 						\item{指令格式:}
-							\begin{figure}[!htbp]
+							\begin{figure}[H]
 								\centering
 								\includegraphics[scale=0.5]{img/s3.png}
 							\end{figure}
@@ -272,12 +272,12 @@
 								B型指令的功能是比较寄存器rs1、rs2中的值，并根比较结果进行分支跳转。
 								funct3字段表示分支跳转的类型。B型指令中beq/bne需进行相等比较的计
 								算，blt/bltu与bge/bgeu需进行量值比较的计算。
-								\begin{figure}[!htbp]
+								\begin{figure}[H]
 									\centering
 									\includegraphics[scale=0.5]{img/b1.png}
 								\end{figure}
 						\item{数据通路\&指令执行流程:}
-							\begin{figure}[!htbp]
+							\begin{figure}[H]
 								\centering
 								\includegraphics[scale=0.5]{img/b2.png}
 							\end{figure}
@@ -298,7 +298,7 @@
 									若进行跳转，则由ALU计算出目标地址送至PC处。
 							\end{enumerate}
 						\item{指令格式:}
-							\begin{figure}[!htbp]
+							\begin{figure}[H]
 								\centering
 								\includegraphics[scale=0.5]{img/b3.png}
 							\end{figure}
@@ -308,12 +308,12 @@
 						\item{简介:}
 							\subitem
 								U型指令包含LUI和AUIPC，用于构建32位常数，由20位立即数，rd和操作码构成。
-								\begin{figure}[!htbp]
+								\begin{figure}[H]
 									\centering
 									\includegraphics[scale=0.5]{img/u1.png}
 								\end{figure}
 						\item{数据通路\&指令执行流程:}
-							\begin{figure}[!htbp]
+							\begin{figure}[H]
 								\centering
 								\includegraphics[scale=0.5]{img/u2.png}
 							\end{figure}
@@ -332,7 +332,7 @@
 									WBsel = 1使得ALU运算结果直接存入寄存器堆中rd所指寄存器；
 							\end{enumerate}
 						\item{指令格式:}
-							\begin{figure}[!htbp]
+							\begin{figure}[H]
 								\centering
 								\includegraphics[scale=0.5]{img/u3.png}
 							\end{figure}
@@ -343,18 +343,18 @@
 							\subitem
 								JAL/JALR的功能是无条件跳转到目标地址。其中JAL指令中目标地址为PC的值加上20位的立即数所表示的偏移量，JALR指令中目标地址为寄存器rs1的值加上12位的立即数所表示的偏移量。
 								JAL/JALR所需的计算类型只有加法运算。
-								\begin{figure}[!htbp]
+								\begin{figure}[H]
 									\centering
 									\includegraphics[scale=0.5]{img/j11.png}
 								\end{figure}
-								\begin{figure}[!htbp]
+								\begin{figure}[H]
 									\centering
 									\includegraphics[scale=0.5]{img/j12.png}
 								\end{figure}
 						\item{数据通路\&指令执行流程:}
 							\subitem
 								JAL
-							\begin{figure}[!htbp]
+							\begin{figure}[H]
 								\centering
 								\includegraphics[scale=0.5]{img/j21.png}
 							\end{figure}
@@ -374,7 +374,7 @@
 							\end{enumerate}
 							\subitem
 								JALR
-							\begin{figure}[!htbp]
+							\begin{figure}[H]
 								\centering
 								\includegraphics[scale=0.5]{img/j22.png}
 							\end{figure}
@@ -393,7 +393,7 @@
 									将原来PC+4的值写回到寄存器rd中；	
 							\end{enumerate}
 						\item{指令格式:}
-							\begin{figure}[!htbp]
+							\begin{figure}[H]
 								\centering
 								\includegraphics[scale=0.5]{img/j3.png}
 							\end{figure}
@@ -408,7 +408,7 @@
 						界上最小的鸟类，其体积虽小，却有着极高的速度与敏锐度，可以说是“能效比”最高的鸟类。
 						E203 系列以蜂鸟命名便寓意于此，旨在将其打造成为一款世界上最高能效比的 RISC 处理器。
 				\end{enumerate}	
-				\begin{figure}[!htbp]
+				\begin{figure}[H]
 					\centering
 					\includegraphics[scale=0.8]{img/four.png}
 				\end{figure}
@@ -426,7 +426,7 @@
 				\end{enumerate}	
 
 			\subsubsection{E203 Core 的代码架构}
-				\begin{figure}[!htbp]
+				\begin{figure}[H]
 					\centering
 					\includegraphics[scale=0.5]{img/framework.png}   
 				\end{figure}
@@ -456,11 +456,11 @@
 				\item 
 					借助MAX 10 FPGA，可以获得比上一代更低的功耗/成本和更高的性能。可支持大量应用，包括协议桥接，电机控制驱动，模数转换和手持设备。T-Core开发板包括硬件，例如板载USB-Blaster II，QSPI Flash，ADC接头连接器，WS2812B RGB LED和2x6 TMD扩展接头连接器。通过利用所有这些功能，T-Core是展示，评估和原型化Intel MAX 10 FPGA真正潜力的理想解决方案。T-Core还通过板载JTAG调试支持RISC-V CPU。它是学习RISC-V CPU设计或嵌入式系统设计的理想平台。
 			\end{enumerate}	
-			\begin{figure}[!htbp]
+			\begin{figure}[H]
 				\centering
 				\includegraphics[scale=1]{img/five.png}
 			\end{figure}
-			\begin{figure}[!htbp]
+			\begin{figure}[H]
 				\centering
 				\includegraphics[scale=1]{img/six.jpg}
 			\end{figure}
@@ -470,12 +470,12 @@
 			\item 常规矩阵运算与自定义矩阵乘法指令的对比
 				\begin{itemize}
 					\item{以 1 x 4 与 4 x 1 大小的矩阵相乘为例}
-						\begin{figure}[!htbp]
+						\begin{figure}[H]
 							\centering
 							\includegraphics[scale=0.5]{img/dot1.png}
 						\end{figure}
 					\item{常规计算需要的总周期数：71；DOT 指令需要的总周期数：1\\}
-						\begin{figure}[!htbp]
+						\begin{figure}[H]
 							\centering
 							\includegraphics[scale=0.5]{img/dot2.png}
 						\end{figure}
@@ -486,18 +486,18 @@
 			操作码字段(opcode)选用 1101011;将功能字段(funct3)定义为 000，
 			将 funct7 字段定义为 0000001;rs1 rs2 字段分别表示两个源操作数寄存器，
 			rd 字段表示目标寄存 器。(注:在实际运算的时候，rs1、rs2 是没有被使用到的)。
-				\begin{figure}[!htbp]
+				\begin{figure}[H]
 					\centering
 					\includegraphics[scale=0.5]{img/dot3.png}
 				\end{figure}
 			
 			\item DOT 指令数据通路分析 \\
 			通过在ALU数据通路中增加几条选择线，可以实现在ALU中添加自定义逻辑单元，并通过译码信号使ALU输出该单元的计算结果。
-			\begin{figure}[!htbp]
+			\begin{figure}[H]
 				\centering
-				\includegraphics[scale=1]{img/alu2.png}
+				\includegraphics[scale=0.8]{img/alu2.png}
 			\end{figure}
-			\begin{figure}[!htbp]
+			\begin{figure}[H]
 				\centering
 				\includegraphics[scale=0.8]{img/datalink.jpg}
 			\end{figure}
@@ -912,7 +912,7 @@
 					\item
 						将 USB Blaster II 线缆的一端连接到开发板的 USB Blaster 接口(J2)，
 						另一端连接至 PC 主机的 USB 接口。
-						\begin{figure}[!htbp]
+						\begin{figure}[H]
 							\centering
 							\includegraphics[scale=0.4]{img/connect.png}
 						\end{figure}
@@ -926,7 +926,7 @@
 		\begin{itemize}
 			\item 
 				常规矩阵运算与自定义矩阵乘法指令的运算耗时对比(49 x 49 大小的矩阵相乘)
-				\begin{figure}[!htbp]
+				\begin{figure}[H]
 					\centering
 					\includegraphics[scale=0.4]{img/result.png}
 				\end{figure}
